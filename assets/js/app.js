@@ -94,16 +94,63 @@ function toggleVideo() {
 // Event listener for mic button
 micButton.addEventListener('click', toggleMic);
 videoButton.addEventListener('click', toggleVideo);
-
 // Function to start video chat
 async function startVideoChat() {
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localVideo.srcObject = localStream;
-    } catch (error) {
-        console.error('Error accessing media devices:', error);
-    }
+  try {
+      const constraints = { video: true, audio: true };
+      localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      localVideo.srcObject = localStream;
+  } catch (error) {
+      console.error('Error accessing media devices:', error);
+  }
 }
 
+// Function to switch between front and rear camera
+function switchCamera() {
+  if (!localStream) {
+      return;
+  }
+  const videoTracks = localStream.getVideoTracks();
+  if (videoTracks.length === 0) {
+      console.warn('No video tracks found');
+      return;
+  }
+  const track = videoTracks[0];
+  track.stop(); // Stop the current track
+
+  // Get the deviceId of the currently selected camera
+  const currentDeviceId = track.getSettings().deviceId;
+
+  // Find the next available camera (front or rear)
+  navigator.mediaDevices.enumerateDevices()
+      .then(devices => {
+          const nextCamera = devices.find(device => {
+              return device.kind === 'videoinput' && device.deviceId !== currentDeviceId;
+          });
+          if (nextCamera) {
+              // Create constraints with the new deviceId
+              const constraints = {
+                  video: {
+                      deviceId: { exact: nextCamera.deviceId }
+                  },
+                  audio: true
+              };
+              // Get the stream from the new camera
+              return navigator.mediaDevices.getUserMedia(constraints);
+          } else {
+              console.warn('No other video input devices found');
+              return Promise.reject('No other video input devices found');
+          }
+      })
+      .then(newStream => {
+          localStream = newStream;
+          localVideo.srcObject = localStream;
+      })
+      .catch(error => {
+          console.error('Error switching camera:', error);
+      });
+}
+// Event listener for "reverse camera" button
+document.getElementById('reverse').addEventListener('click', switchCamera);
 // Event listener for start button
 document.getElementById('person').addEventListener('click', startVideoChat);
