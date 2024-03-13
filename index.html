@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="assets/css/style.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+            rel="stylesheet">
+            <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+            rel="stylesheet">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+            <title>LYNC | Video Chatting Platform</title>
+    </head>
+    <body id="home" class="light-theme">
+        <header>
+            <nav>
+                <div class="nav-container"></div>
+            </nav>
+        </header>
+        <div class="banner">
+            <div class="banner1">
+                <img src="assets/images/24.webp" alt>
+                <div class="content-wrapper">
+                    <div class="form">
+                        <!--<label class="text-title">Username</label>-->
+                        <input type="text" name="username"
+                            placeholder="Username" id="username" class="hide">
+                        <input type="text" name="email" placeholder="E-mail"
+                            id="email">
+                        <!--<label class="text-title">Password</label>-->
+                        <input type="password" name="password"
+                            placeholder="Password" id="password">
+                            <span id="togglePassword" class="material-icons">
+                                password
+                                </span>
+                    </div>
+                    <div class="btns">
+                    <button id="signUp" class="cntbutton">SignUp</button>
+                    <button id="signIn" class="cntbutton">Login</button>
+                    <button id="google" class="cntbutton google">Google</button>
+                    <button id="signOut" class="cntbutton hide">Logout</button></div>
+                </div>
+            </div>
+            <div class="video-wrapper hide">
+            </div><div class="nav-bottom">
+                <div class="bottom-container">
+                    <div class="bicon">
+                        <span id="videoIcon" class="material-icons">videocam</span>
+                        <span id="micIcon" class="material-icons">mic</span>
+                        <span class="material-icons">flip_camera_android</span>
+                        <span id="person" class="material-icons">person_add</span>
+                    </div>
+                </div>
+            </div><div id="videoElement"> <video id="localVideo" autoplay></video>
+            <video id="remoteVideo" autoplay></video>
+            </div>
+        </div>
+        <main class="content hide">
+            <div class="actualc"></div>
+        </main>
+        <footer class="copyright" id="footer"></footer>
+        <script src="assets/js/app.js"></script>
+        <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, set, update, ref } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyC3rXnirQLwQ-vurCyj6LYpG6m1bwWjpnY",
+  authDomain: "auth-d9b69.firebaseapp.com",
+  databaseURL: "https://auth-d9b69-default-rtdb.firebaseio.com",
+  projectId: "auth-d9b69",
+  storageBucket: "auth-d9b69.appspot.com",
+  messagingSenderId: "437508370197",
+  appId: "1:437508370197:web:6938fa19bee7e266fc431c"
+};  // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database=getDatabase(app);
+    const auth=getAuth();
+    const user = auth.currentUser;
+    // Function to handle user sign up
+function handleSignUp(email, username, password) {
+    createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            setUserData(user.uid, username, email);
+            handleUserLoggedIn();
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
+}
+
+// Function to set user data in the database
+function setUserData(uid, username, email) {
+    set(ref(database, 'users/' + uid), {
+        displayName: username,
+        email: email
+    });
+}
+
+// Function to handle user login
+function handleLogin(email, password) {
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            updateLastLogin(user.uid);
+            handleUserLoggedIn();
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
+}
+
+// Function to update user's last login time
+function updateLastLogin(uid) {
+    const dt = new Date();
+    update(ref(database, 'users/' + uid), {
+        last_login: dt
+    });
+}
+const contentWrapper=document.querySelector('.content-wrapper');
+const vdodiv=document.querySelector('.video-wrapper');
+// Function to handle user logged in state
+function handleUserLoggedIn() {
+    const page = document.querySelector('.content');
+    page.classList.remove('hide');
+    page.classList.add('loggedin');
+    logout.classList.remove('hide');
+    signUp.classList.add('hide');
+    login.classList.add('hide');
+    googleLogin.classList.add('hide');
+    contentWrapper.classList.add('hide');   
+    vdodiv.classList.remove('hide');   
+}
+
+// Function to handle user logged out state
+function handleUserLoggedOut() {
+    const page = document.querySelector('.content');
+    page.classList.add('hide');
+    page.classList.remove('loggedin');
+    signUp.classList.remove('hide');
+    login.classList.remove('hide');
+    logout.classList.add('hide');
+    googleLogin.classList.remove('hide');
+    contentWrapper.classList.remove('hide');
+    vdodiv.classList.add('hide');   
+}
+
+// Function to handle sign out
+function handleSignOut() {
+    signOut(auth)
+        .then(() => {
+            handleUserLoggedOut();
+            alert("Signed Out!");
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
+}
+
+const login=document.getElementById("signIn");
+const signUp=document.getElementById("signUp");
+const logout=document.getElementById("signOut");
+// Event listeners
+signUp.addEventListener('click', (e) => {
+    const email = document.getElementById("email").value;
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    handleSignUp(email, username, password);
+});
+
+login.addEventListener('click', (e) => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    handleLogin(email, password);
+});
+
+logout.addEventListener('click', (e) => {
+    handleSignOut();
+});
+
+    const provider = new GoogleAuthProvider();
+    auth.languageCode = 'en';
+    const googleLogin =document.getElementById('google')
+// Function to handle Google sign in
+function handleGoogleSignIn() {
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+            const user = result.user;
+            handleUserLoggedIn();
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
+}
+
+// Event listener for Google sign-in button
+googleLogin.addEventListener('click', () => {
+    handleGoogleSignIn();
+});
+// Create a fixed div for displaying user information
+const userInfoDiv = document.createElement('div');
+const vdodiv1=document.querySelector('.video-wrapper-container');
+userInfoDiv.id = 'user-info';
+vdodiv.appendChild(userInfoDiv);function displayUserInfo(user) {
+    console.log(user);
+
+    userInfoDiv.innerHTML = `
+        <div class="video-wrapper-container"><div class="para">
+        <p><strong>Sign-in provider:</strong> ${user.providerData[0].providerId}</p>
+        <p><strong>Provider-specific UID:</strong> ${user.providerData[0].uid}</p>
+        </div><div class="fu input-box">
+            <label class="input-label" for="displayName">Name:</label>
+            <input onfocus="setFocus(true)" onblur="setFocus(false)" type="text" id="displayName" class="input-1" value="${user.providerData[0].displayName || ''}" /><br>
+        </div>
+        <div class="input-box">
+            <label class="input-label" for="email">Email:</label>
+            <input onfocus="setFocus(true)" onblur="setFocus(false)" readonly type="email" id="nemail" class="input-1" value="${user.providerData[0].email || ''}" /><br>
+        </div>
+        <div class="input-box">
+            <label class="input-label" for="photoURL">Profile Image:</label>
+            <input onfocus="setFocus(true)" onblur="setFocus(false)" type="text" id="photoURL" class="input-1" value="${user.providerData[0].photoURL || ''}" /><br>
+        </div>
+    
+    <div id="profilepic">
+        ${user.providerData[0].photoURL 
+            ? `<img src="${user.providerData[0].photoURL}" alt="Profile Picture">`
+            : `<img src="assets/images/user.webp" alt="Profile Picture">`
+        }
+    <button class="profbtns con" id="saveUserInfo">Continue</button>
+    <button class="profbtns" id="logout">Logout</button>
+    </div>
+    </div>
+    `;
+
+    
+    // Event listener for save button
+    const saveUserInfoBtn = document.getElementById('saveUserInfo');
+    saveUserInfoBtn.addEventListener('click', () => {
+        const newName = document.getElementById('displayName').value;
+        const newEmail = document.getElementById('nemail').value;
+        const newPhotoURL = document.getElementById('photoURL').value;
+        updateUserInfo(user.uid, newName, newEmail, newPhotoURL);
+    });
+
+    // Event listener for logout button
+    const logoutBtn = document.getElementById('logout');
+    logoutBtn.addEventListener('click', () => {
+        handleSignOut();
+    });
+}// Function to update user information in Firebase
+function updateUserInfo(uid, newName, newEmail, newPhotoURL) {
+    const updates = {};
+    if (newName !== null && newName !== undefined) {
+        updates['displayName'] = newName;
+    }
+    if (newEmail !== null && newEmail !== undefined) {
+        updates['email'] = newEmail;
+    }
+    if (newPhotoURL !== null && newPhotoURL !== undefined) {
+        updates['photoURL'] = newPhotoURL;
+    }
+    
+    update(ref(database, 'users/' + uid), updates)
+    .then(() => {
+        alert('User information updated successfully!');
+    })
+    .catch((error) => {
+        alert('Error updating user information: ' + error.message);
+    });
+}
+
+
+// Check if user is logged in
+if (user !== null) {
+    displayUserInfo(user);
+}
+
+// Listen for changes in authentication state
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        displayUserInfo(user);
+        handleUserLoggedIn();
+    } else {
+        // Clear user info if user is logged out
+        userInfoDiv.innerHTML = '';
+    }
+});
+
+  </script>
+    </body>
+</html>
