@@ -1,0 +1,253 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply transition-colors duration-200 antialiased selection:bg-neutral-200 dark:selection:bg-neutral-800;
+  }
+}
+
+@property --ambient-glow-1 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: rgba(52, 211, 153, 0.06);
+}
+
+@property --ambient-glow-2 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: rgba(45, 212, 191, 0.06);
+}
+
+:root {
+  --border-color: #e4e4e7;
+  --border-hover: #a1a1aa;
+  --text-color: #09090b;
+  --bg-color: #fafafa;
+  --focus-color: #09090b;
+  --hover-bg: #f4f4f5;
+  --card-bg: #ffffff;
+  --ambient-glow-1: rgba(52, 211, 153, 0.06);
+  --ambient-glow-2: rgba(45, 212, 191, 0.06);
+}
+
+.dark {
+  --border-color: #27272a;
+  --border-hover: #52525b;
+  --text-color: #fafafa;
+  --bg-color: #09090b;
+  --focus-color: #ffffff;
+  --hover-bg: #27272a;
+  --card-bg: #18181b;
+  --ambient-glow-1: rgba(99, 102, 241, 0.08);
+  --ambient-glow-2: rgba(59, 130, 246, 0.08);
+}
+
+/* Premium Vercel Grid & Grainy Mesh Background Effect */
+.grid-bg {
+  background-color: var(--bg-color);
+  background-size: 30px 30px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  position: relative;
+  z-index: 0;
+  overflow: hidden; /* safety for scaling animated layers */
+}
+
+.dark .grid-bg {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+}
+
+/* Layer 1: Animated Mesh Gradient Glows */
+.grid-bg::before {
+  content: "";
+  position: absolute;
+  width: 160%;
+  height: 160%;
+  top: -30%;
+  left: -30%;
+  z-index: -2;
+  opacity: 0.85;
+  background-image: 
+    radial-gradient(circle at 20% 30%, var(--ambient-glow-1) 0%, transparent 60%),
+    radial-gradient(circle at 80% 70%, var(--ambient-glow-2) 0%, transparent 60%);
+  filter: blur(80px);
+  pointer-events: none;
+  animation: floatMesh 25s ease-in-out infinite;
+  transition: --ambient-glow-1 1.5s ease-in-out, --ambient-glow-2 1.5s ease-in-out;
+}
+
+.dark .grid-bg::before {
+  opacity: 0.7;
+  background-image: 
+    radial-gradient(circle at 20% 30%, var(--ambient-glow-1) 0%, transparent 60%),
+    radial-gradient(circle at 80% 70%, var(--ambient-glow-2) 0%, transparent 60%);
+  transition: --ambient-glow-1 1.5s ease-in-out, --ambient-glow-2 1.5s ease-in-out;
+}
+
+/* Layer 2: Grain Overlay */
+.grid-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+.dark .grid-bg::after {
+  opacity: 0.05;
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-color);
+}
+
+/* Input Custom Styles */
+.input-box {
+  @apply relative w-full flex flex-col gap-1.5;
+}
+
+.input-box label {
+  @apply text-[10px] font-bold uppercase tracking-wider text-vercel-text-muted font-mono select-none;
+}
+
+.input-box input {
+  @apply w-full h-10 px-3 text-xs rounded border outline-none transition-all bg-transparent font-mono;
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.input-box input:focus {
+  border-color: var(--border-hover);
+  box-shadow: 0 0 0 1px var(--border-hover);
+}
+
+/* Custom premium card style */
+.card-premium {
+  @apply border rounded-2xl pt-5 pb-6 px-5 md:pt-6 md:pb-8 md:px-6 transition-all duration-300 flex flex-col justify-between shadow-xl backdrop-blur-md;
+  border-color: var(--border-color);
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+.dark .card-premium {
+  background-color: rgba(24, 24, 27, 0.75);
+}
+
+.card-premium:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.06);
+}
+
+.dark .card-premium:hover {
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4);
+}
+
+/* Mirror local video stream */
+.mirror-video video {
+  transform: scaleX(-1);
+}
+
+/* Agora video element fitting overrides */
+.video-player-container video {
+  object-fit: cover !important;
+}
+.video-player-container.video-contain video {
+  object-fit: contain !important;
+}
+
+/* Button utility classes */
+.btn-primary {
+  @apply h-10 px-4 rounded text-[11px] font-bold tracking-wider uppercase select-none transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 font-mono;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  border: 1px solid var(--text-color);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  @apply h-10 px-4 rounded text-[11px] font-bold tracking-wider uppercase select-none transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 border font-mono;
+  border-color: var(--border-color);
+  color: var(--text-color);
+  background-color: transparent;
+}
+
+.btn-secondary:hover {
+  background-color: var(--hover-bg);
+  border-color: var(--border-hover);
+}
+
+/* Floating Reactions Animation */
+@keyframes floatUpAndFade {
+  0% {
+    transform: translateY(0) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(-20px) scale(1.25) rotate(-10deg);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-300px) scale(0.6) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+.reaction-bubble {
+  position: absolute;
+  bottom: 72px;
+  pointer-events: none;
+  font-size: 2.25rem;
+  z-index: 50;
+  animation: floatUpAndFade 2.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+
+@keyframes floatMesh {
+  0% {
+    transform: rotate(0deg) scale(1) translate(0px, 0px);
+  }
+  33% {
+    transform: rotate(120deg) scale(1.15) translate(30px, -50px);
+  }
+  66% {
+    transform: rotate(240deg) scale(0.9) translate(-30px, 30px);
+  }
+  100% {
+    transform: rotate(360deg) scale(1) translate(0px, 0px);
+  }
+}
+
+/* Premium Apple-Like transitions */
+.ease-out-spring {
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.transition-spring {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition-duration: 380ms;
+}
