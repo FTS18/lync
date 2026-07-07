@@ -335,22 +335,7 @@ export default function Home() {
               Secure · Real-Time · WebRTC Calling
             </p>
 
-            {/* App Description — visible to Google reviewers + users */}
-            <div className="max-w-md md:max-w-lg text-center space-y-4 px-4 mt-2">
-              <p className="text-[12px] md:text-[13px] leading-relaxed text-vercel-text-muted font-sans font-normal tracking-wide">
-                <span className="text-vercel-text-light dark:text-white font-bold font-mono tracking-wider">LYNC</span> is a minimalist, browser-based video conferencing workspace. Create secure instant meetings, schedule calendar invites, collaborate on documents, and share screens with no downloads required.
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {["Video Calls", "Live Chat", "Screen Share", "Calendar Sync", "Drive Backup", "Whiteboard"].map((f) => (
-                  <span 
-                    key={f} 
-                    className="px-2.5 py-1 rounded-full border border-neutral-200/50 dark:border-neutral-800/80 bg-neutral-100/50 dark:bg-neutral-900/50 text-[9px] font-mono text-vercel-text-muted uppercase tracking-widest font-bold select-none hover:border-neutral-300 dark:hover:border-neutral-700 transition-all"
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
-            </div>
+
           </div>
 
           {!user ? (
