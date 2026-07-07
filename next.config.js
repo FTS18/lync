@@ -4,6 +4,28 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["agora-token"],
   },
+  webpack: (config, { nextRuntime }) => {
+    if (nextRuntime === "edge") {
+      if (Array.isArray(config.externals)) {
+        config.externals.push({
+          crypto: "commonjs node:crypto",
+          zlib: "commonjs node:zlib",
+          buffer: "commonjs node:buffer",
+          util: "commonjs node:util",
+          stream: "commonjs node:stream",
+        });
+      } else if (typeof config.externals === "object") {
+        Object.assign(config.externals, {
+          crypto: "commonjs node:crypto",
+          zlib: "commonjs node:zlib",
+          buffer: "commonjs node:buffer",
+          util: "commonjs node:util",
+          stream: "commonjs node:stream",
+        });
+      }
+    }
+    return config;
+  },
 
   // Security & PWA headers
   async headers() {
