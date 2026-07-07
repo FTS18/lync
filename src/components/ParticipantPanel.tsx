@@ -41,6 +41,10 @@ interface ParticipantPanelProps {
   onEndPoll: () => void;
   onCreatePoll: (question: string, options: string[]) => void;
   visible: boolean;
+
+  // Waiting Room props
+  waitingRoomEnabled?: boolean;
+  onToggleWaitingRoom?: () => void;
 }
 
 export default function ParticipantPanel({
@@ -61,6 +65,8 @@ export default function ParticipantPanel({
   onEndPoll,
   onCreatePoll,
   visible,
+  waitingRoomEnabled = false,
+  onToggleWaitingRoom = () => {},
 }: ParticipantPanelProps) {
   const [showPollCreator, setShowPollCreator] = useState(false);
   const [pollQuestion, setPollQuestion] = useState("");
@@ -163,6 +169,37 @@ export default function ParticipantPanel({
 
       {/* Main Content Areas split between Members & Polls */}
       <div className="flex-grow overflow-y-auto p-3 space-y-4">
+        {/* Host Controls: Waiting Room Toggle */}
+        {localIsAdmin && (
+          <div className="p-3 border border-vercel-border-light dark:border-vercel-border-dark bg-vercel-light/50 dark:bg-vercel-dark/50 rounded-xl space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-vercel-text-muted font-mono">
+                  Room Settings
+                </p>
+                <h3 className="text-xs font-bold text-vercel-text-light dark:text-white mt-0.5">
+                  Waiting Room
+                </h3>
+              </div>
+              <button
+                onClick={onToggleWaitingRoom}
+                className={`h-7 px-3 rounded-lg text-[9px] uppercase tracking-wider font-black font-mono transition-all border ${
+                  waitingRoomEnabled
+                    ? "bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20"
+                    : "bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20"
+                }`}
+              >
+                {waitingRoomEnabled ? "Enabled" : "Disabled"}
+              </button>
+            </div>
+            <p className="text-[10px] leading-normal text-vercel-text-muted opacity-80">
+              {waitingRoomEnabled 
+                ? "New guests must be approved by the host before entering." 
+                : "Anyone can join this meeting room directly."}
+            </p>
+          </div>
+        )}
+
         {/* Members Section */}
         <div className="space-y-2">
           <p className="text-[10px] font-bold uppercase tracking-widest text-vercel-text-muted font-mono pl-1">

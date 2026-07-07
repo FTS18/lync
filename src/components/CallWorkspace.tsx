@@ -177,6 +177,7 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
   const [roomParticipants, setRoomParticipants] = useState<Participant[]>([]);
   const [adminsMap, setAdminsMap] = useState<{ [key: string]: boolean }>({});
   const [creatorUid, setCreatorUid] = useState<string | null>(null);
+  const [waitingRoomEnabled, setWaitingRoomEnabled] = useState(false);
 
   const [remoteUsers, setRemoteUsers] = useState<IAgoraRTCRemoteUser[]>([]);
   
@@ -618,6 +619,14 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
       }
     });
 
+    // Sync Waiting Room configuration
+    const waitingRoomEnabledRef = ref(database, `rooms/${roomId}/metadata/waitingRoomEnabled`);
+    const handleWaitingRoomEnabledValue = onValue(waitingRoomEnabledRef, (snapshot) => {
+      if (!active) return;
+      const val = snapshot.val();
+      setWaitingRoomEnabled(val === true);
+    });
+
     // Listen to local user participant updates (for forceMute / kick triggers)
     let myParticipantUnsubscribe: (() => void) | null = null;
     const listenToMyParticipantTriggers = (clientUid: string | number) => {
@@ -832,6 +841,7 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
       off(messagesRef, "child_added", handleMessageAdded);
       off(participantsRef, "value", handleParticipantsValue);
       off(adminsRef, "value", handleAdminsValue);
+      off(waitingRoomEnabledRef, "value", handleWaitingRoomEnabledValue);
 
       if (unsubscribeWaiting) unsubscribeWaiting();
       if (unsubscribePoll) unsubscribePoll();
@@ -1171,6 +1181,40 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
   }, [roomId]);
 
   // Waiting Room Management
+  const handleToggleWaitingRoom = useCallback(async () => {
+    triggerHaptic();
+    playTapSound();
+    
+    const nextVal = !waitingRoomEnabled;
+    const configRef = ref(database, `rooms/${roomId}/metadata/waitingRoomEnabled`);
+    await set(configRef, nextVal);
+
+    // If disabling the waiting room, automatically admit everyone currently waiting
+    if (!nextVal) {
+      try {
+        const waitingRef = ref(database, `rooms/${roomId}/waitingRoom`);
+        const snapshot = await get(waitingRef);
+        const data = snapshot.val();
+        if (data) {
+          const updates: Record<string, any> = {};
+          Object.keys(data).forEach((uid) => {
+            updates[`${uid}/admitted`] = true;
+          });
+          await update(waitingRef, updates);
+          
+          // Clear the waiting room records after a short delay (matching handleAdmitWaitingUser)
+          setTimeout(async () => {
+            Object.keys(data).forEach(async (uid) => {
+              await remove(ref(database, `rooms/${roomId}/waitingRoom/${uid}`));
+            });
+          }, 1000);
+        }
+      } catch (err) {
+        console.error("Failed to auto-admit waiting users:", err);
+      }
+    }
+  }, [roomId, waitingRoomEnabled]);
+
   const handleAdmitWaitingUser = useCallback(async (targetUid: string) => {
     const waitingRef = ref(database, `rooms/${roomId}/waitingRoom/${targetUid}`);
     await update(waitingRef, { admitted: true });
@@ -1337,15 +1381,29 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
           if (isHost) {
             setWaitingForAdmit(false);
           } else {
-            const myUid = user?.uid || guestUid;
-            const waitingRef = ref(database, `rooms/${roomId}/waitingRoom/${myUid}`);
-            await set(waitingRef, {
-              uid: myUid,
-              displayName: displayName,
-              requestedAt: Date.now(),
-              admitted: false,
-            });
-            setWaitingForAdmit(true);
+            // Get waiting room configuration setting (defaults to false)
+            let isWaitingEnabled = false;
+            try {
+              const waitingEnabledRef = ref(database, `rooms/${roomId}/metadata/waitingRoomEnabled`);
+              const snap = await get(waitingEnabledRef);
+              isWaitingEnabled = snap.val() === true;
+            } catch (err) {
+              console.error("Failed to read waitingRoomEnabled config:", err);
+            }
+
+            if (isWaitingEnabled) {
+              const myUid = user?.uid || guestUid;
+              const waitingRef = ref(database, `rooms/${roomId}/waitingRoom/${myUid}`);
+              await set(waitingRef, {
+                uid: myUid,
+                displayName: displayName,
+                requestedAt: Date.now(),
+                admitted: false,
+              });
+              setWaitingForAdmit(true);
+            } else {
+              setWaitingForAdmit(false);
+            }
           }
         }}
         onCancel={handleLeave}
@@ -2084,6 +2142,8 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
         onEndPoll={handleEndPoll}
         onCreatePoll={handleCreatePoll}
         visible={showParticipants}
+        waitingRoomEnabled={waitingRoomEnabled}
+        onToggleWaitingRoom={handleToggleWaitingRoom}
       />
       {/* Google Shared Doc Panel */}
       <GoogleDocPanel
