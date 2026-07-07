@@ -268,7 +268,43 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
           console.warn("Failed to retrieve cameras:", err);
         });
     }
-  }, []);
+  // Auto-start camera and mic if enabled in the lobby
+  const autoInitTracksRef = useRef(false);
+  useEffect(() => {
+    if (!joined || autoInitTracksRef.current) return;
+    
+    const initLobbyTracks = async () => {
+      const client = clientRef.current;
+      if (!client) return;
+      autoInitTracksRef.current = true;
+
+      // Initialize audio if enabled in lobby
+      if (!audioMuted && !localAudioTrackRef.current) {
+        try {
+          const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+          setLocalAudioTrack(audioTrack);
+          localAudioTrackRef.current = audioTrack;
+          await client.publish(audioTrack);
+        } catch (err) {
+          console.error("Auto Microphone creation failed:", err);
+        }
+      }
+
+      // Initialize video if enabled in lobby
+      if (!videoMuted && !localVideoTrackRef.current) {
+        try {
+          const videoTrack = await AgoraRTC.createCameraVideoTrack({ facingMode });
+          setLocalVideoTrack(videoTrack);
+          localVideoTrackRef.current = videoTrack;
+          await client.publish(videoTrack);
+        } catch (err) {
+          console.error("Auto Camera creation failed:", err);
+        }
+      }
+    };
+
+    initLobbyTracks();
+  }, [joined, audioMuted, videoMuted, facingMode]);
 
   const handleSwitchCamera = useCallback(async (deviceId: string) => {
     if (localVideoTrackRef.current) {
