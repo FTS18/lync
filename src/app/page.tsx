@@ -318,120 +318,119 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-grow flex items-start justify-center pt-16 pb-24 px-4 md:pt-28 md:pb-32 md:px-12">
-        {!user ? (
-          /* Auth Form Card */
-          <div className="w-full max-w-[380px] border border-vercel-border-light dark:border-vercel-border-dark bg-vercel-light dark:bg-vercel-dark p-8 rounded-lg shadow-xl relative overflow-hidden animate-in zoom-in-95 duration-200">
-            {/* Subtle glow border */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-right from-neutral-200 to-neutral-800 dark:from-neutral-800 dark:to-neutral-200" />
-            
-            <h2 className="text-lg font-bold tracking-tight text-center mb-1 font-mono uppercase">
-              {isSignUp ? "Create Account" : "Welcome Back"}
-            </h2>
-            <p className="text-[11px] text-vercel-text-muted text-center mb-6">
-              {isSignUp ? "Join the calling space instantly" : "Sign in to join a room"}
+        <div className="w-full max-w-4xl space-y-6 md:space-y-8 py-1 md:py-2 animate-in slide-in-from-bottom-4 duration-300">
+          {/* Center Hero Logo Banner */}
+          <div className="flex flex-col justify-center items-center py-6 gap-4 animate-in fade-in zoom-in-95 duration-700">
+            {/* Glow bloom behind logo */}
+            <div className="relative flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full bg-white/10 dark:bg-white/5 blur-3xl scale-150 pointer-events-none" />
+              <img 
+                src="/logo.png" 
+                alt="Lync Logo" 
+                className="relative h-32 md:h-52 w-auto object-contain dark:invert-0 invert drop-shadow-2xl" 
+              />
+            </div>
+            {/* Tagline */}
+            <p className="text-[9px] md:text-[10px] font-mono uppercase tracking-[0.35em] text-vercel-text-muted text-center">
+              Secure · Real-Time · WebRTC Calling
             </p>
 
-            <form onSubmit={handleAuth} className="space-y-4">
-              {isSignUp && (
-                <div className="input-box">
-                  <label htmlFor="username">Username</label>
-                  <input
-                    id="username"
-                    type="text"
-                    placeholder="john_doe"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                  />
-                </div>
-              )}
-              <div className="input-box">
-                <label htmlFor="email">E-mail</label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+            {/* App Description — visible to Google reviewers + users */}
+            <div className="max-w-md md:max-w-lg text-center space-y-4 px-4 mt-2">
+              <p className="text-[12px] md:text-[13px] leading-relaxed text-vercel-text-muted font-sans font-normal tracking-wide">
+                <span className="text-vercel-text-light dark:text-white font-bold font-mono tracking-wider">LYNC</span> is a minimalist, browser-based video conferencing workspace. Create secure instant meetings, schedule calendar invites, collaborate on documents, and share screens with no downloads required.
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {["Video Calls", "Live Chat", "Screen Share", "Calendar Sync", "Drive Backup", "Whiteboard"].map((f) => (
+                  <span 
+                    key={f} 
+                    className="px-2.5 py-1 rounded-full border border-neutral-200/50 dark:border-neutral-800/80 bg-neutral-100/50 dark:bg-neutral-900/50 text-[9px] font-mono text-vercel-text-muted uppercase tracking-widest font-bold select-none hover:border-neutral-300 dark:hover:border-neutral-700 transition-all"
+                  >
+                    {f}
+                  </span>
+                ))}
               </div>
-              <div className="input-box">
-                <label htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-
-              <button type="submit" className="w-full btn-primary h-11">
-                {isSignUp ? "Sign Up" : "Login"}
-              </button>
-            </form>
-
-            <div className="relative flex py-5 items-center">
-              <div className="flex-grow border-t border-vercel-border-light dark:border-vercel-border-dark"></div>
-              <span className="flex-shrink mx-4 text-vercel-text-muted text-[10px] uppercase font-mono tracking-wider">or</span>
-              <div className="flex-grow border-t border-vercel-border-light dark:border-vercel-border-dark"></div>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                onClick={handleGoogleSignIn}
-                className="w-full btn-secondary h-11 flex items-center justify-center gap-2"
-              >
-                <Chrome className="h-4 w-4" /> Google
-              </button>
-              
-              <button
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="w-full text-center text-[10px] tracking-wide font-bold uppercase text-vercel-text-muted hover:text-vercel-text-light dark:hover:text-vercel-text-dark transition-colors font-mono"
-              >
-                {isSignUp ? "Sign In Instead" : "Create Account Instead"}
-              </button>
             </div>
           </div>
-        ) : (
-          /* Unified Action Card: Create & Join Dashboard + Recent History */
-          <div className="w-full max-w-4xl space-y-6 md:space-y-8 py-1 md:py-2 animate-in slide-in-from-bottom-4 duration-300">
-            {/* Center Hero Logo Banner */}
-            <div className="flex flex-col justify-center items-center py-6 gap-4 animate-in fade-in zoom-in-95 duration-700">
-              {/* Glow bloom behind logo */}
-              <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full bg-white/10 dark:bg-white/5 blur-3xl scale-150 pointer-events-none" />
-                <img 
-                  src="/logo.png" 
-                  alt="Lync Logo" 
-                  className="relative h-32 md:h-52 w-auto object-contain dark:invert-0 invert drop-shadow-2xl" 
-                />
-              </div>
-              {/* Tagline */}
-              <p className="text-[9px] md:text-[10px] font-mono uppercase tracking-[0.35em] text-vercel-text-muted text-center">
-                Secure · Real-Time · WebRTC Calling
+
+          {!user ? (
+            /* Auth Form Card */
+            <div className="w-full max-w-[380px] mx-auto border border-vercel-border-light dark:border-vercel-border-dark bg-vercel-light dark:bg-vercel-dark p-8 rounded-lg shadow-xl relative overflow-hidden animate-in zoom-in-95 duration-200">
+              {/* Subtle glow border */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-right from-neutral-200 to-neutral-800 dark:from-neutral-800 dark:to-neutral-200" />
+              
+              <h2 className="text-lg font-bold tracking-tight text-center mb-1 font-mono uppercase">
+                {isSignUp ? "Create Account" : "Welcome Back"}
+              </h2>
+              <p className="text-[11px] text-vercel-text-muted text-center mb-6">
+                {isSignUp ? "Join the calling space instantly" : "Sign in to join a room"}
               </p>
 
-              {/* App Description — visible to Google reviewers + users */}
-              <div className="max-w-md md:max-w-lg text-center space-y-4 px-4 mt-2">
-                <p className="text-[12px] md:text-[13px] leading-relaxed text-vercel-text-muted font-sans font-normal tracking-wide">
-                  <span className="text-vercel-text-light dark:text-white font-bold font-mono tracking-wider">LYNC</span> is a minimalist, browser-based video conferencing workspace. Create secure instant meetings, schedule calendar invites, collaborate on documents, and share screens with no downloads required.
-                </p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {["Video Calls", "Live Chat", "Screen Share", "Calendar Sync", "Drive Backup", "Whiteboard"].map((f) => (
-                    <span 
-                      key={f} 
-                      className="px-2.5 py-1 rounded-full border border-neutral-200/50 dark:border-neutral-800/80 bg-neutral-100/50 dark:bg-neutral-900/50 text-[9px] font-mono text-vercel-text-muted uppercase tracking-widest font-bold select-none hover:border-neutral-300 dark:hover:border-neutral-700 transition-all"
-                    >
-                      {f}
-                    </span>
-                  ))}
+              <form onSubmit={handleAuth} className="space-y-4">
+                {isSignUp && (
+                  <div className="input-box">
+                    <label htmlFor="username">Username</label>
+                    <input
+                      id="username"
+                      type="text"
+                      placeholder="john_doe"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                    />
+                  </div>
+                )}
+                <div className="input-box">
+                  <label htmlFor="email">E-mail</label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
+                <div className="input-box">
+                  <label htmlFor="password">Password</label>
+                  <input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+
+                <button type="submit" className="w-full btn-primary h-11">
+                  {isSignUp ? "Sign Up" : "Login"}
+                </button>
+              </form>
+
+              <div className="relative flex py-5 items-center">
+                <div className="flex-grow border-t border-vercel-border-light dark:border-vercel-border-dark"></div>
+                <span className="flex-shrink mx-4 text-vercel-text-muted text-[10px] uppercase font-mono tracking-wider">or</span>
+                <div className="flex-grow border-t border-vercel-border-light dark:border-vercel-border-dark"></div>
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  onClick={handleGoogleSignIn}
+                  className="w-full btn-secondary h-11 flex items-center justify-center gap-2"
+                >
+                  <Chrome className="h-4 w-4" /> Google
+                </button>
+                
+                <button
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="w-full text-center text-[10px] tracking-wide font-bold uppercase text-vercel-text-muted hover:text-vercel-text-light dark:hover:text-vercel-text-dark transition-colors font-mono"
+                >
+                  {isSignUp ? "Sign In Instead" : "Create Account Instead"}
+                </button>
               </div>
             </div>
-
-
-            {/* Centered Aligning Cards Container */}
-            <div className="max-w-[460px] mx-auto w-full space-y-6">
+          ) : (
+            <>
+              {/* Centered Aligning Cards Container */}
+              <div className="max-w-[460px] mx-auto w-full space-y-6">
               {/* Single Unified Action Card */}
               <div className="card-premium">
                 {/* Section A: Start a Meeting */}
@@ -639,9 +638,10 @@ export default function Home() {
 
             {/* Google Calendar Sidebar — upcoming events */}
             <CalendarSidebar />
-          </div>
+          </>
         )}
-      </main>
+      </div>
+    </main>
 
 
       {/* Attendance Report Modal */}
