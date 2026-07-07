@@ -268,6 +268,8 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
           console.warn("Failed to retrieve cameras:", err);
         });
     }
+  }, []);
+
   // Auto-start camera and mic if enabled in the lobby
   const autoInitTracksRef = useRef(false);
   useEffect(() => {
