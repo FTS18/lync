@@ -412,13 +412,16 @@ export default function Home() {
               </p>
 
               {/* App Description — visible to Google reviewers + users */}
-              <div className="max-w-xs text-center space-y-3">
-                <p className="text-[12px] leading-6 text-vercel-text-muted font-sans">
-                  <strong className="text-vercel-text-light dark:text-white font-mono">Lync</strong> is a free, browser-based video conferencing platform. Create instant meetings or schedule calls, share screens, collaborate on documents, and connect with anyone — no downloads required.
+              <div className="max-w-md md:max-w-lg text-center space-y-4 px-4 mt-2">
+                <p className="text-[12px] md:text-[13px] leading-relaxed text-vercel-text-muted font-sans font-normal tracking-wide">
+                  <span className="text-vercel-text-light dark:text-white font-bold font-mono tracking-wider">LYNC</span> is a minimalist, browser-based video conferencing workspace. Create secure instant meetings, schedule calendar invites, collaborate on documents, and share screens with no downloads required.
                 </p>
-                <div className="flex flex-wrap justify-center gap-1.5">
+                <div className="flex flex-wrap justify-center gap-2">
                   {["Video Calls", "Live Chat", "Screen Share", "Calendar Sync", "Drive Backup", "Whiteboard"].map((f) => (
-                    <span key={f} className="px-2 py-0.5 rounded-full border border-vercel-border-light dark:border-vercel-border-dark text-[9px] font-mono text-vercel-text-muted uppercase tracking-wider">
+                    <span 
+                      key={f} 
+                      className="px-2.5 py-1 rounded-full border border-neutral-200/50 dark:border-neutral-800/80 bg-neutral-100/50 dark:bg-neutral-900/50 text-[9px] font-mono text-vercel-text-muted uppercase tracking-widest font-bold select-none hover:border-neutral-300 dark:hover:border-neutral-700 transition-all"
+                    >
                       {f}
                     </span>
                   ))}
