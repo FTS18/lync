@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { RtcTokenBuilder, RtcRole } from "agora-token";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 // ─── In-memory rate limiter ─────────────────────────────────────────────────
@@ -104,8 +104,6 @@ export async function GET(req: NextRequest) {
   if (isNaN(uid) || uid < 0 || uid > 4294967295) {
     uid = 0; // 0 = auto-assign by Agora
   }
-
-  const { RtcTokenBuilder, RtcRole } = await import("agora-token");
 
   const role = RtcRole.PUBLISHER;
   const currentTimestamp = Math.floor(Date.now() / 1000);

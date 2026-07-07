@@ -3,8 +3,6 @@
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 
-export const runtime = "edge";
-
 // Load CallWorkspace dynamically on the client side
 const CallWorkspace = dynamic(
   () => import("@/components/CallWorkspace"),
