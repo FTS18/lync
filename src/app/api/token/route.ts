@@ -1,14 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RtcTokenBuilder, RtcRole } from "agora-token";
 
+export const runtime = "edge";
+
 // ─── In-memory rate limiter ─────────────────────────────────────────────────
 // Map<ip, { count, windowStart }>
 const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
 const RATE_LIMIT_MAX = 15;       // max requests per window
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute window
+let lastPruned = Date.now();
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
+
+  // Lazy prune old entries every 5 minutes on incoming requests to avoid memory bloat
+  if (now - lastPruned > 300_000) {
+    rateLimitMap.forEach((record, key) => {
+      if (now - record.windowStart > RATE_LIMIT_WINDOW_MS * 5) {
+        rateLimitMap.delete(key);
+      }
+    });
+    lastPruned = now;
+  }
+
   const record = rateLimitMap.get(ip);
 
   if (!record || now - record.windowStart > RATE_LIMIT_WINDOW_MS) {
@@ -23,16 +37,6 @@ function isRateLimited(ip: string): boolean {
   record.count++;
   return false;
 }
-
-// Prune old entries every 5 minutes to avoid memory bloat
-setInterval(() => {
-  const now = Date.now();
-  rateLimitMap.forEach((record, ip) => {
-    if (now - record.windowStart > RATE_LIMIT_WINDOW_MS * 5) {
-      rateLimitMap.delete(ip);
-    }
-  });
-}, 300_000);
 
 // ─── Channel name validation ─────────────────────────────────────────────────
 function isValidChannel(name: string): boolean {
