@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -21,7 +21,11 @@ export default function CalendarSidebar() {
       const data = await listUpcomingCalendarEvents(7);
       setEvents(data);
     } catch (err: any) {
-      setError(err.message ?? "Failed to load calendar events.");
+      if (err.message && (err.message.includes("403") || err.message.includes("401"))) {
+        setError("Calendar integration is inactive (missing OAuth permission).");
+      } else {
+        setError(err.message ?? "Failed to load calendar events.");
+      }
     } finally {
       setLoading(false);
     }

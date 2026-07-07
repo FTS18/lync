@@ -90,8 +90,7 @@ export function useFirebase() {
     // Google Login
     const signInWithGoogle = () => {
         const provider = new GoogleAuthProvider();
-        // Request Calendar + Drive scopes
-        provider.addScope("https://www.googleapis.com/auth/calendar");
+        // Request Drive scope (non-sensitive, does not trigger Google verification block)
         provider.addScope("https://www.googleapis.com/auth/drive.file");
         provider.setCustomParameters({ prompt: 'select_account' });
         return signInWithPopup(auth, provider).then(async (result) => {

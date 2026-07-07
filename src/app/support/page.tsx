@@ -1,10 +1,8 @@
-﻿import Link from "next/link";
-import { Mail, MessageCircle, BookOpen, Shield, Zap, Video } from "lucide-react";
+"use client";
 
-export const metadata = {
-  title: "Support — Lync",
-  description: "Get help with Lync. Contact support, read FAQs, and troubleshoot common issues.",
-};
+import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
+import { Mail, BookOpen, Shield, Zap, Video, FileText } from "lucide-react";
 
 const faqs = [
   {
@@ -45,28 +43,33 @@ const faqs = [
   },
   {
     q: "How do I delete my account?",
-    a: "Email us at support@lyncc.netlify.app with the subject 'Account Deletion Request'. We will process your request and remove all associated data within 30 days."
-  },
+    a: "Email us at dubeyananay@gmail.com with the subject 'Account Deletion Request'. We will process your request and remove all associated data within 30 days."
+  }
 ];
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen flex flex-col grid-bg">
+    <div className="min-h-screen flex flex-col justify-between grid-bg animate-in fade-in duration-300">
+      <title>Support — Lync</title>
+
       {/* Nav */}
       <header className="fixed top-0 left-0 right-0 border-b border-vercel-border-light dark:border-vercel-border-dark bg-vercel-light/75 dark:bg-vercel-black/75 backdrop-blur-md z-50">
-        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="text-lg font-black tracking-widest uppercase font-mono text-vercel-text-light dark:text-white select-none">
+        <div className="max-w-2xl mx-auto px-4 md:px-0 h-11 md:h-16 flex items-center justify-between">
+          <Link href="/" className="text-lg md:text-xl font-black tracking-widest uppercase font-mono text-vercel-text-light dark:text-white select-none">
             LYNC
           </Link>
-          <Link href="/" className="text-[10px] font-mono uppercase tracking-wider text-vercel-text-muted hover:text-vercel-text-light dark:hover:text-white transition-colors">
-            ← Back
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-[10px] font-mono uppercase tracking-wider text-vercel-text-muted hover:text-vercel-text-light dark:hover:text-white transition-colors">
+              ← Back
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 pt-24 pb-20 px-6">
-        <div className="max-w-3xl mx-auto space-y-12">
-
+      {/* Content */}
+      <main className="flex-grow pt-20 md:pt-28 pb-20 px-4 md:px-0">
+        <div className="max-w-2xl mx-auto space-y-12">
           {/* Header */}
           <div className="space-y-3 border-b border-vercel-border-light dark:border-vercel-border-dark pb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-vercel-text-muted">Help Center</p>
@@ -82,22 +85,22 @@ export default function SupportPage() {
               {
                 icon: <Mail className="h-5 w-5" />,
                 label: "Email",
-                value: "support@lyncc.netlify.app",
-                href: "mailto:support@lyncc.netlify.app",
+                value: "dubeyananay@gmail.com",
+                href: "mailto:dubeyananay@gmail.com",
                 desc: "General support & billing"
               },
               {
                 icon: <Shield className="h-5 w-5" />,
                 label: "Privacy",
-                value: "privacy@lyncc.netlify.app",
-                href: "mailto:privacy@lyncc.netlify.app",
+                value: "dubeyananay@gmail.com",
+                href: "mailto:dubeyananay@gmail.com",
                 desc: "Data requests & GDPR"
               },
               {
                 icon: <BookOpen className="h-5 w-5" />,
                 label: "Legal",
-                value: "legal@lyncc.netlify.app",
-                href: "mailto:legal@lyncc.netlify.app",
+                value: "dubeyananay@gmail.com",
+                href: "mailto:dubeyananay@gmail.com",
                 desc: "Terms & copyright"
               },
             ].map((c) => (
@@ -156,17 +159,17 @@ export default function SupportPage() {
               ))}
             </div>
           </div>
-
         </div>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-vercel-border-light dark:border-vercel-border-dark bg-vercel-light/50 dark:bg-vercel-black/50 text-[10px] text-vercel-text-muted font-mono">
-        <div className="max-w-3xl mx-auto px-6 h-12 flex items-center justify-between">
-          <p>© {new Date().getFullYear()} LYNC. All Rights Reserved.</p>
-          <div className="flex items-center gap-4">
+        <div className="max-w-2xl mx-auto px-4 md:px-0 h-12 flex items-center justify-between">
+          <p>© {new Date().getFullYear()} LYNC.</p>
+          <div className="flex items-center gap-4 uppercase tracking-wider text-[9px]">
             <Link href="/privacy" className="hover:text-vercel-text-light dark:hover:text-white transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-vercel-text-light dark:hover:text-white transition-colors">Terms</Link>
+            <Link href="/support" className="hover:text-vercel-text-light dark:hover:text-white transition-colors">Support</Link>
           </div>
         </div>
       </footer>
