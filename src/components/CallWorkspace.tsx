@@ -1270,6 +1270,10 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
     
     if (isAtTop) {
       if (deltaY > 0) {
+        // Prevent default native browser behavior (like pull-to-refresh) when dragging sheet down
+        if (e.cancelable) {
+          e.preventDefault();
+        }
         setSheetDragY(deltaY);
       } else {
         const resistance = 0.25;
