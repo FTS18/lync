@@ -1128,7 +1128,21 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
       setScreenSharing(false);
     } else {
       try {
-        const screenTrack = await AgoraRTC.createScreenVideoTrack({}, "disable");
+        let screenTrack;
+        try {
+          screenTrack = await AgoraRTC.createScreenVideoTrack({}, "disable");
+        } catch (agoraErr) {
+          console.warn("Agora screen share failed, trying native getDisplayMedia fallback...", agoraErr);
+          if (typeof navigator !== "undefined" && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            const videoTrack = stream.getVideoTracks()[0];
+            screenTrack = AgoraRTC.createCustomVideoTrack({
+              mediaStreamTrack: videoTrack,
+            });
+          } else {
+            throw agoraErr;
+          }
+        }
         screenTrackRef.current = screenTrack;
 
         screenTrack.on("track-ended", async () => {
