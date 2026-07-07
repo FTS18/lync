@@ -90,8 +90,8 @@ export function useFirebase() {
     // Google Login
     const signInWithGoogle = () => {
         const provider = new GoogleAuthProvider();
-        // Request Drive scope (non-sensitive, does not trigger Google verification block)
-        provider.addScope("https://www.googleapis.com/auth/drive.file");
+        // Request Drive scope (non-sensitive, does not trigger Google verification block) - Temporarily disabled
+        // provider.addScope("https://www.googleapis.com/auth/drive.file");
         provider.setCustomParameters({ prompt: 'select_account' });
         return signInWithPopup(auth, provider).then(async (result) => {
             // Extract and store the Google OAuth access token

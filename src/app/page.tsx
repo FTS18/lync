@@ -636,8 +636,8 @@ export default function Home() {
               )}
             </div>
 
-            {/* Google Calendar Sidebar — upcoming events */}
-            <CalendarSidebar />
+            {/* Google Calendar Sidebar — upcoming events (Temporarily disabled) */}
+            {/* <CalendarSidebar /> */}
           </>
         )}
       </div>

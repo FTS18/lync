@@ -910,9 +910,9 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
         }
       } catch { /* ignore */ }
 
-      // Show artifacts modal
-      setShowArtifactsModal(true);
-      return; // router.push happens after modal close
+      // Show artifacts modal (Temporarily disabled)
+      // setShowArtifactsModal(true);
+      // return; // router.push happens after modal close
     }
 
     router.push("/");
@@ -943,12 +943,14 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
   const handleSendReaction = useCallback((emoji: string) => {
     triggerHaptic();
     playTapSound();
-    const reactionsRef = ref(database, `rooms/${roomId}/reactions`);
-    push(reactionsRef, {
-      senderUid: clientRef.current?.uid || "anonymous",
-      emoji,
-      timestamp: Date.now(),
-    });
+    const myUid = clientRef.current?.uid;
+    if (myUid !== undefined) {
+      const myParticipantRef = ref(database, `rooms/${roomId}/participants/${myUid}`);
+      update(myParticipantRef, {
+        reaction: emoji,
+        reactionTimestamp: Date.now(),
+      }).catch((err) => console.error("Failed to send reaction:", err));
+    }
   }, [roomId]);
 
   const handleToggleFilter = useCallback(() => {
