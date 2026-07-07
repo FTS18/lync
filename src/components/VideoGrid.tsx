@@ -185,14 +185,56 @@ export default function VideoGrid({
     return name ? name.substring(0, 2).toUpperCase() : "U";
   };
 
-  // Helper to render initials avatar circle for camera-off feeds
+  const getParticipantPhoto = (uid: string | number): string | undefined => {
+    if (uid === "local") {
+      const me = roomParticipants.find((p) => String(p.uid) === String(localClientUid));
+      return me?.photoURL;
+    }
+    const participant = roomParticipants.find((p) => String(p.uid) === String(uid));
+    return participant?.photoURL;
+  };
+
+  const AVATAR_BG_PALETTES = [
+    { bg: "bg-blue-50/50 dark:bg-blue-950/20", border: "border-blue-100 dark:border-blue-900/30", text: "text-blue-600 dark:text-blue-450" },
+    { bg: "bg-emerald-50/50 dark:bg-emerald-950/20", border: "border-emerald-100 dark:border-emerald-900/30", text: "text-emerald-600 dark:text-emerald-450" },
+    { bg: "bg-violet-50/50 dark:bg-violet-950/20", border: "border-violet-100 dark:border-violet-900/30", text: "text-violet-600 dark:text-violet-450" },
+    { bg: "bg-amber-50/50 dark:bg-amber-950/20", border: "border-amber-100 dark:border-amber-900/30", text: "text-amber-600 dark:text-amber-450" },
+    { bg: "bg-rose-50/50 dark:bg-rose-950/20", border: "border-rose-100 dark:border-rose-900/30", text: "text-rose-600 dark:text-rose-450" },
+    { bg: "bg-cyan-50/50 dark:bg-cyan-950/20", border: "border-cyan-100 dark:border-cyan-900/30", text: "text-cyan-600 dark:text-cyan-450" }
+  ];
+
+  const getAvatarStyle = (uid: string | number) => {
+    const key = String(uid);
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      hash = key.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % AVATAR_BG_PALETTES.length;
+    return AVATAR_BG_PALETTES[index];
+  };
+
+  // Helper to render initials or Google Profile Avatar circle for camera-off feeds
   const renderAvatarPlaceholder = (uid: string | number) => {
     const name = getParticipantName(uid);
+    const photoURL = getParticipantPhoto(uid);
+    const palette = getAvatarStyle(uid);
+
     return (
-      <div className="flex flex-col items-center justify-center w-full h-full bg-vercel-dark rounded-lg overflow-hidden select-none">
-        <div className="w-14 h-14 rounded-full bg-vercel-light dark:bg-vercel-black border border-vercel-border-light dark:border-vercel-border-dark flex items-center justify-center text-xs font-bold font-mono tracking-wider shadow-sm animate-pulse text-vercel-text-light dark:text-vercel-text-dark">
-          {getInitials(name)}
-        </div>
+      <div className={`flex flex-col items-center justify-center w-full h-full rounded-lg overflow-hidden select-none transition-colors duration-300 ${palette.bg}`}>
+        {photoURL ? (
+          <img
+            src={photoURL}
+            alt={name}
+            className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover shadow-md border-2 border-white/20 dark:border-white/10"
+            onError={(e) => {
+              (e.target as HTMLElement).style.display = "none";
+            }}
+          />
+        ) : (
+          <div className={`w-14 h-14 md:w-16 md:h-16 rounded-full border flex items-center justify-center text-xs md:text-sm font-black font-mono tracking-widest shadow-sm bg-vercel-light dark:bg-vercel-black ${palette.border} ${palette.text}`}>
+            {getInitials(name)}
+          </div>
+        )}
       </div>
     );
   };
@@ -385,226 +427,6 @@ export default function VideoGrid({
     );
   };
 
-  const isPinned = pinnedUid !== null;
-
-  // Render Pinned Split Layout
-  if (isPinned) {
-    const isLocalPinned = pinnedUid === "local";
-    const pinnedRemoteUser = remoteUsers.find((u) => u.uid === pinnedUid);
-    
-    const localQuality = networkQualities["local"];
-    const localSpeaking = activeSpeakers["local"] || (localClientUid !== null && activeSpeakers[String(localClientUid)]);
-
-    return (
-      <div className="flex-grow flex flex-col gap-4 w-full h-full min-h-0">
-        {/* Top Strip of Unpinned users */}
-        <div className="flex gap-4 overflow-x-auto py-2 px-3 border border-vercel-border-light dark:border-vercel-border-dark rounded bg-vercel-light dark:bg-vercel-dark max-h-[110px] items-center">
-          {/* Local if not pinned */}
-          {!isLocalPinned && localVideoTrack && (
-            <div 
-              onDoubleClick={() => handleDoubleInteraction("local")}
-              onTouchStart={() => handleTouchStart("local")}
-              className={`relative w-28 aspect-video rounded overflow-hidden flex-shrink-0 bg-black flex items-center justify-center border transition-all select-none video-card-local ${
-                localSpeaking
-                  ? "border-vercel-text-light dark:border-vercel-light ring-2 ring-vercel-text-light/20 dark:ring-vercel-light/20"
-                  : "border-vercel-border-light dark:border-vercel-border-dark"
-              }`}
-              title="Double click/tap to Pin"
-            >
-              {!localVideoMuted ? (
-                <VideoPlayer track={localVideoTrack} isLocal={true} className="w-full h-full object-cover" />
-              ) : (
-                renderAvatarPlaceholder("local")
-              )}
-              <span className="absolute bottom-1 left-1.5 bg-black/75 px-1.5 py-0.5 border border-white/10 text-[8px] text-white rounded font-mono truncate max-w-[80%] flex items-center gap-1.5">
-                {getNetworkQualityDot(localQuality)}
-                {localName}
-              </span>
-
-              {/* Floating Mute Indicator Badge (Left of menu key) */}
-              {localAudioMuted && (
-                <div className="absolute top-1 right-8 bg-red-500/90 p-0.5 rounded-full border border-white/20 text-white z-10">
-                  <MicOff className="h-2 w-2" />
-                </div>
-              )}
-
-              {/* Three-dot context menu trigger */}
-              <div className="absolute top-1 right-1.5 z-20">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenMenuUid(openMenuUid === "local" ? null : "local");
-                  }}
-                  className="p-0.5 rounded bg-black/60 border border-white/10 text-white hover:bg-black/90 transition-colors"
-                >
-                  <MoreVertical className="h-2 w-2" />
-                </button>
-                {openMenuUid === "local" && renderContextMenu("local", true)}
-              </div>
-            </div>
-          )}
-
-          {/* Remotes if not pinned */}
-          {remoteUsers
-            .filter((u) => u.uid !== pinnedUid)
-            .map((user) => {
-              const rQuality = networkQualities[String(user.uid)];
-              const rSpeaking = activeSpeakers[String(user.uid)] === true;
-              const rParticipant = roomParticipants.find((p) => String(p.uid) === String(user.uid));
-              const rAudioMuted = rParticipant?.audioMuted ?? true;
-
-              return (
-                <div 
-                  key={user.uid}
-                  onDoubleClick={() => handleDoubleInteraction(user.uid)}
-                  onTouchStart={() => handleTouchStart(user.uid)}
-                  className={`relative w-28 aspect-video rounded overflow-hidden flex-shrink-0 bg-black flex items-center justify-center border transition-all select-none video-card-${user.uid} ${
-                    rSpeaking
-                      ? "border-vercel-text-light dark:border-vercel-light ring-2 ring-vercel-text-light/20 dark:ring-vercel-light/20"
-                      : "border-vercel-border-light dark:border-vercel-border-dark"
-                  }`}
-                  title="Double click/tap to Pin"
-                >
-                  {user.videoTrack && user.hasVideo ? (
-                    <VideoPlayer track={user.videoTrack} className="w-full h-full object-cover" />
-                  ) : (
-                    renderAvatarPlaceholder(user.uid)
-                  )}
-                  <span className="absolute bottom-1 left-1.5 bg-black/75 px-1.5 py-0.5 border border-white/10 text-[8px] text-white rounded font-mono truncate max-w-[80%] flex items-center gap-1.5">
-                    {getNetworkQualityDot(rQuality)}
-                    UID: {user.uid}
-                  </span>
-
-                  {/* Floating Mute Indicator Badge (Left of menu key) */}
-                  {rAudioMuted && (
-                    <div className="absolute top-1 right-8 bg-red-500/90 p-0.5 rounded-full border border-white/20 text-white z-10">
-                      <MicOff className="h-2 w-2" />
-                    </div>
-                  )}
-
-                  {/* Three-dot context menu trigger */}
-                  <div className="absolute top-1 right-1.5 z-20">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenMenuUid(openMenuUid === user.uid ? null : user.uid);
-                      }}
-                      className="p-0.5 rounded bg-black/60 border border-white/10 text-white hover:bg-black/90 transition-colors"
-                    >
-                      <MoreVertical className="h-0.5 w-0.5" />
-                    </button>
-                    {openMenuUid === user.uid && renderContextMenu(user.uid, false)}
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-
-        {/* Maximized Main Video Screen */}
-        <div className="flex-1 min-h-0 relative bg-vercel-dark border border-vercel-border-light dark:border-vercel-border-dark rounded-lg overflow-hidden flex items-center justify-center">
-          {isLocalPinned ? (
-            // Local user pinned
-            <div 
-              onDoubleClick={() => handleDoubleInteraction("local")}
-              onTouchStart={() => handleTouchStart("local")}
-              className={`w-full h-full relative flex items-center justify-center cursor-pointer select-none transition-all duration-300 video-card-local ${
-                localSpeaking
-                  ? "ring-2 ring-vercel-text-light/35 dark:ring-vercel-light/35 shadow-inner"
-                  : ""
-              }`}
-              title="Double click/tap to Unpin"
-            >
-              {!localVideoMuted && localVideoTrack ? (
-                <VideoPlayer track={localVideoTrack} isLocal={true} className="video-player-container video-contain" />
-              ) : (
-                renderAvatarPlaceholder("local")
-              )}
-              <div className="absolute bottom-3 left-3 bg-black/75 px-3 py-1.5 border border-white/10 text-white rounded text-xs font-mono flex items-center gap-2">
-                {getNetworkQualityDot(localQuality)}
-                {localName} (You)
-              </div>
-
-              {/* Floating Mute Indicator Badge */}
-              {localAudioMuted && (
-                <div className="absolute top-3 right-11 bg-red-500/90 p-1.5 rounded-full border border-white/20 text-white z-10">
-                  <MicOff className="h-3.5 w-3.5" />
-                </div>
-              )}
-
-              {/* Three-dot context menu trigger */}
-              <div className="absolute top-3 right-3 z-20">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenMenuUid(openMenuUid === "local" ? null : "local");
-                  }}
-                  className="p-1.5 rounded bg-black/60 border border-white/10 text-white hover:bg-black/90 transition-colors"
-                >
-                  <MoreVertical className="h-3.5 w-3.5" />
-                </button>
-                {openMenuUid === "local" && renderContextMenu("local", true)}
-              </div>
-            </div>
-          ) : pinnedRemoteUser ? (
-            // Remote user pinned
-            <div 
-              onDoubleClick={() => handleDoubleInteraction(pinnedRemoteUser.uid)}
-              onTouchStart={() => handleTouchStart(pinnedRemoteUser.uid)}
-              className={`w-full h-full relative flex items-center justify-center cursor-pointer select-none transition-all duration-300 video-card-${pinnedRemoteUser.uid} ${
-                activeSpeakers[String(pinnedRemoteUser.uid)]
-                  ? "ring-2 ring-vercel-text-light/35 dark:ring-vercel-light/35 shadow-inner"
-                  : ""
-              }`}
-              title="Double click/tap to Unpin"
-            >
-              {pinnedRemoteUser.videoTrack && pinnedRemoteUser.hasVideo ? (
-                <VideoPlayer track={pinnedRemoteUser.videoTrack} className="video-player-container video-contain" />
-              ) : (
-                renderAvatarPlaceholder(pinnedRemoteUser.uid)
-              )}
-              <div className="absolute bottom-3 left-3 bg-black/75 px-3 py-1.5 border border-white/10 text-white rounded text-xs font-mono flex items-center gap-2">
-                {getNetworkQualityDot(networkQualities[String(pinnedRemoteUser.uid)])}
-                UID: {pinnedRemoteUser.uid}
-              </div>
-
-              {/* Floating Mute Indicator Badge */}
-              {(!pinnedRemoteUser.hasAudio || (roomParticipants.find(p => String(p.uid) === String(pinnedRemoteUser.uid))?.audioMuted)) && (
-                <div className="absolute top-3 right-11 bg-red-500/90 p-1.5 rounded-full border border-white/20 text-white z-10">
-                  <MicOff className="h-3.5 w-3.5" />
-                </div>
-              )}
-
-              {/* Three-dot context menu trigger */}
-              <div className="absolute top-3 right-3 z-20">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenMenuUid(openMenuUid === pinnedRemoteUser.uid ? null : pinnedRemoteUser.uid);
-                  }}
-                  className="p-1.5 rounded bg-black/60 border border-white/10 text-white hover:bg-black/90 transition-colors"
-                >
-                  <MoreVertical className="h-3.5 w-3.5" />
-                </button>
-                {openMenuUid === pinnedRemoteUser.uid && renderContextMenu(pinnedRemoteUser.uid, false)}
-              </div>
-            </div>
-          ) : (
-            // Fallback if pinned user left
-            <div className="text-vercel-text-muted text-xs font-mono">
-              User left the call. Double click to reset.
-            </div>
-          )}
-
-          {/* Floating Pin Indicator Badge */}
-          <div className="absolute top-3 left-3 bg-vercel-text-light/95 text-vercel-light dark:bg-vercel-light/95 dark:text-vercel-black px-2.5 py-1 border border-white/10 rounded flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider font-mono shadow-sm z-10">
-            <Pin className="h-3 w-3 fill-current rotate-45" />
-            <span>Pinned</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Google Meet Overflow Logic:
   // Assemble complete participant list to sort and decide grid rendering
   interface GridItem {
@@ -724,6 +546,226 @@ export default function VideoGrid({
     if (Math.abs(dx) > 40) { dx < 0 ? goNext() : goPrev(); }
     swipeStartX.current = null;
   };
+
+  const isPinned = pinnedUid !== null;
+
+  // Render Pinned Split Layout
+  if (isPinned) {
+    const isLocalPinned = pinnedUid === "local";
+    const pinnedRemoteUser = remoteUsers.find((u) => u.uid === pinnedUid);
+    
+    const localQuality = networkQualities["local"];
+    const localSpeaking = activeSpeakers["local"] || (localClientUid !== null && activeSpeakers[String(localClientUid)]);
+
+    return (
+      <div className="flex-grow flex flex-col gap-4 w-full h-full min-h-0">
+        {/* Top Strip of Unpinned users */}
+        <div className="flex gap-4 overflow-x-auto py-2 px-3 border border-vercel-border-light dark:border-vercel-border-dark rounded bg-vercel-light/75 dark:bg-vercel-dark/75 max-h-[110px] items-center font-mono">
+          {/* Local if not pinned */}
+          {!isLocalPinned && localVideoTrack && (
+            <div 
+              onDoubleClick={() => handleDoubleInteraction("local")}
+              onTouchStart={() => handleTouchStart("local")}
+              className={`relative w-28 aspect-video rounded overflow-hidden flex-shrink-0 bg-black flex items-center justify-center border transition-all select-none video-card-local ${
+                localSpeaking
+                  ? "border-vercel-text-light dark:border-vercel-light ring-2 ring-vercel-text-light/20 dark:ring-vercel-light/20"
+                  : "border-vercel-border-light dark:border-vercel-border-dark"
+              }`}
+              title="Double click/tap to Pin"
+            >
+              {!localVideoMuted ? (
+                <VideoPlayer track={localVideoTrack} isLocal={true} className="w-full h-full object-cover" />
+              ) : (
+                renderAvatarPlaceholder("local")
+              )}
+              <span className="absolute bottom-1 left-1.5 bg-black/75 px-1.5 py-0.5 border border-white/10 text-[8px] text-white rounded font-mono truncate max-w-[80%] flex items-center gap-1.5">
+                {getNetworkQualityDot(localQuality)}
+                {localName}
+              </span>
+
+              {/* Floating Mute Indicator Badge (Left of menu key) */}
+              {localAudioMuted && (
+                <div className="absolute top-1 right-8 bg-red-500/90 p-0.5 rounded-full border border-white/20 text-white z-10">
+                  <MicOff className="h-2 w-2" />
+                </div>
+              )}
+
+              {/* Three-dot context menu trigger */}
+              <div className="absolute top-1 right-1.5 z-20">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenMenuUid(openMenuUid === "local" ? null : "local");
+                  }}
+                  className="p-0.5 rounded bg-black/60 border border-white/10 text-white hover:bg-black/90 transition-colors"
+                >
+                  <MoreVertical className="h-2 w-2" />
+                </button>
+                {openMenuUid === "local" && renderContextMenu("local", true)}
+              </div>
+            </div>
+          )}
+
+          {/* Remotes if not pinned */}
+          {remoteUsers
+            .filter((u) => u.uid !== pinnedUid)
+            .map((user) => {
+              const rQuality = networkQualities[String(user.uid)];
+              const rSpeaking = activeSpeakers[String(user.uid)] === true;
+              const rParticipant = roomParticipants.find((p) => String(p.uid) === String(user.uid));
+              const rAudioMuted = rParticipant?.audioMuted ?? true;
+
+              return (
+                <div 
+                  key={user.uid}
+                  onDoubleClick={() => handleDoubleInteraction(user.uid)}
+                  onTouchStart={() => handleTouchStart(user.uid)}
+                  className={`relative w-28 aspect-video rounded overflow-hidden flex-shrink-0 bg-black flex items-center justify-center border transition-all select-none video-card-${user.uid} ${
+                    rSpeaking
+                      ? "border-vercel-text-light dark:border-vercel-light ring-2 ring-vercel-text-light/20 dark:ring-vercel-light/20"
+                      : "border-vercel-border-light dark:border-vercel-border-dark"
+                  }`}
+                  title="Double click/tap to Pin"
+                >
+                  {user.videoTrack && user.hasVideo ? (
+                    <VideoPlayer track={user.videoTrack} className="w-full h-full object-cover" />
+                  ) : (
+                    renderAvatarPlaceholder(user.uid)
+                  )}
+                  <span className="absolute bottom-1 left-1.5 bg-black/75 px-1.5 py-0.5 border border-white/10 text-[8px] text-white rounded font-mono truncate max-w-[80%] flex items-center gap-1.5">
+                    {getNetworkQualityDot(rQuality)}
+                    UID: {user.uid}
+                  </span>
+
+                  {/* Floating Mute Indicator Badge (Left of menu key) */}
+                  {rAudioMuted && (
+                    <div className="absolute top-1 right-8 bg-red-500/90 p-0.5 rounded-full border border-white/20 text-white z-10">
+                      <MicOff className="h-2 w-2" />
+                    </div>
+                  )}
+
+                  {/* Three-dot context menu trigger */}
+                  <div className="absolute top-1 right-1.5 z-20">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuUid(openMenuUid === user.uid ? null : user.uid);
+                      }}
+                      className="p-0.5 rounded bg-black/60 border border-white/10 text-white hover:bg-black/90 transition-colors"
+                    >
+                      <MoreVertical className="h-0.5 w-0.5" />
+                    </button>
+                    {openMenuUid === user.uid && renderContextMenu(user.uid, false)}
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+
+        {/* Maximized Main Video Screen */}
+        <div className="flex-1 min-h-0 relative bg-vercel-dark border border-vercel-border-light dark:border-vercel-border-dark rounded-lg overflow-hidden flex items-center justify-center">
+          {isLocalPinned ? (
+            // Local user pinned
+            <div 
+              onDoubleClick={() => handleDoubleInteraction("local")}
+              onTouchStart={() => handleTouchStart("local")}
+              className={`w-full h-full relative flex items-center justify-center cursor-pointer select-none transition-all duration-350 video-card-local ${
+                localSpeaking
+                  ? "ring-2 ring-vercel-text-light/35 dark:ring-vercel-light/35 shadow-inner"
+                  : ""
+              }`}
+              title="Double click/tap to Unpin"
+            >
+              {!localVideoMuted && localVideoTrack ? (
+                <VideoPlayer track={localVideoTrack} isLocal={true} className="video-player-container video-contain" />
+              ) : (
+                renderAvatarPlaceholder("local")
+              )}
+              <div className="absolute bottom-3 left-3 bg-black/75 px-3 py-1.5 border border-white/10 text-white rounded text-xs font-mono flex items-center gap-2">
+                {getNetworkQualityDot(localQuality)}
+                {localName} (You)
+              </div>
+
+              {/* Floating Mute Indicator Badge */}
+              {localAudioMuted && (
+                <div className="absolute top-3 right-11 bg-red-500/90 p-1.5 rounded-full border border-white/20 text-white z-10">
+                  <MicOff className="h-3.5 w-3.5" />
+                </div>
+              )}
+
+              {/* Three-dot context menu trigger */}
+              <div className="absolute top-3 right-3 z-20">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenMenuUid(openMenuUid === "local" ? null : "local");
+                  }}
+                  className="p-1.5 rounded bg-black/60 border border-white/10 text-white hover:bg-black/90 transition-colors"
+                >
+                  <MoreVertical className="h-3.5 w-3.5" />
+                </button>
+                {openMenuUid === "local" && renderContextMenu("local", true)}
+              </div>
+            </div>
+          ) : pinnedRemoteUser ? (
+            // Remote user pinned
+            <div 
+              onDoubleClick={() => handleDoubleInteraction(pinnedRemoteUser.uid)}
+              onTouchStart={() => handleTouchStart(pinnedRemoteUser.uid)}
+              className={`w-full h-full relative flex items-center justify-center cursor-pointer select-none transition-all duration-350 video-card-${pinnedRemoteUser.uid} ${
+                activeSpeakers[String(pinnedRemoteUser.uid)]
+                  ? "ring-2 ring-vercel-text-light/35 dark:ring-vercel-light/35 shadow-inner"
+                  : ""
+              }`}
+              title="Double click/tap to Unpin"
+            >
+              {pinnedRemoteUser.videoTrack && pinnedRemoteUser.hasVideo ? (
+                <VideoPlayer track={pinnedRemoteUser.videoTrack} className="video-player-container video-contain" />
+              ) : (
+                renderAvatarPlaceholder(pinnedRemoteUser.uid)
+              )}
+              <div className="absolute bottom-3 left-3 bg-black/75 px-3 py-1.5 border border-white/10 text-white rounded text-xs font-mono flex items-center gap-2">
+                {getNetworkQualityDot(networkQualities[String(pinnedRemoteUser.uid)])}
+                UID: {pinnedRemoteUser.uid}
+              </div>
+
+              {/* Floating Mute Indicator Badge */}
+              {(!pinnedRemoteUser.hasAudio || (roomParticipants.find(p => String(p.uid) === String(pinnedRemoteUser.uid))?.audioMuted)) && (
+                <div className="absolute top-3 right-11 bg-red-500/90 p-1.5 rounded-full border border-white/20 text-white z-10">
+                  <MicOff className="h-3.5 w-3.5" />
+                </div>
+              )}
+
+              {/* Three-dot context menu trigger */}
+              <div className="absolute top-3 right-3 z-20">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenMenuUid(openMenuUid === pinnedRemoteUser.uid ? null : pinnedRemoteUser.uid);
+                  }}
+                  className="p-1.5 rounded bg-black/60 border border-white/10 text-white hover:bg-black/90 transition-colors"
+                >
+                  <MoreVertical className="h-3.5 w-3.5" />
+                </button>
+                {openMenuUid === pinnedRemoteUser.uid && renderContextMenu(pinnedRemoteUser.uid, false)}
+              </div>
+            </div>
+          ) : (
+            // Fallback if pinned user left
+            <div className="text-vercel-text-muted text-xs font-mono">
+              User left the call. Double click to reset.
+            </div>
+          )}
+
+          {/* Floating Pin Indicator Badge */}
+          <div className="absolute top-3 left-3 bg-vercel-text-light/95 text-vercel-light dark:bg-vercel-light/95 dark:text-vercel-black px-2.5 py-1 border border-white/10 rounded flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider font-mono shadow-sm z-10">
+            <Pin className="h-3 w-3 fill-current rotate-45" />
+            <span>Pinned</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const localQuality = networkQualities["local"];
   const localSpeaking = activeSpeakers["local"] || (localClientUid !== null && activeSpeakers[String(localClientUid)]);

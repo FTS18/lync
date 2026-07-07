@@ -1,0 +1,3 @@
+[build]
+  # Force Netlify to cancel automatic build triggers on git pushes to save build minutes
+  ignore = "exit 1"

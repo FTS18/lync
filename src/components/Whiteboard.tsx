@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { Trash2, X, ShieldAlert } from "lucide-react";
 import { database } from "@/lib/firebase";
 import { ref, push, onChildAdded, onValue, set, off } from "firebase/database";
+import { useTheme } from "@/context/ThemeContext";
 
 interface WhiteboardProps {
   roomId: string;
@@ -24,14 +25,16 @@ export default function Whiteboard({ roomId, onClose }: WhiteboardProps) {
   const isDrawingRef = useRef(false);
   const lastPosRef = useRef({ x: 0, y: 0 });
 
+  const { theme } = useTheme();
+
   // Monochrome colors: Black (in light mode), White (in dark mode), and Greys
   const [currentColor, setCurrentColor] = useState("#000000");
 
   useEffect(() => {
     // Detect theme on mount and set appropriate default color
-    const isDark = document.documentElement.classList.contains("dark");
+    const isDark = theme === "dark";
     setCurrentColor(isDark ? "#ffffff" : "#000000");
-  }, []);
+  }, [theme]);
 
   // Sync canvas size to container
   useEffect(() => {
@@ -219,7 +222,17 @@ export default function Whiteboard({ roomId, onClose }: WhiteboardProps) {
       </div>
 
       {/* Drawing Canvas Container */}
-      <div ref={containerRef} className="flex-1 w-full relative cursor-crosshair bg-white dark:bg-neutral-900">
+      <div 
+        ref={containerRef} 
+        className="flex-1 w-full relative cursor-crosshair bg-vercel-light dark:bg-vercel-black text-neutral-300/30 dark:text-neutral-800/40 transition-colors duration-200"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, currentColor 1px, transparent 1px),
+            linear-gradient(to bottom, currentColor 1px, transparent 1px)
+          `,
+          backgroundSize: '24px 24px',
+        }}
+      >
         <canvas
           ref={canvasRef}
           onMouseDown={handleMouseDown}
