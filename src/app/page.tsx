@@ -417,7 +417,7 @@ export default function Home() {
                   <strong className="text-vercel-text-light dark:text-white font-mono">Lync</strong> is a free, browser-based video conferencing platform. Create instant meetings or schedule calls, share screens, collaborate on documents, and connect with anyone — no downloads required.
                 </p>
                 <div className="flex flex-wrap justify-center gap-1.5">
-                  {["📹 Video Calls", "💬 Live Chat", "🖥 Screen Share", "📅 Calendar Sync", "📂 Drive Backup", "🎨 Whiteboard"].map((f) => (
+                  {["Video Calls", "Live Chat", "Screen Share", "Calendar Sync", "Drive Backup", "Whiteboard"].map((f) => (
                     <span key={f} className="px-2 py-0.5 rounded-full border border-vercel-border-light dark:border-vercel-border-dark text-[9px] font-mono text-vercel-text-muted uppercase tracking-wider">
                       {f}
                     </span>
