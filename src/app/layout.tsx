@@ -16,7 +16,10 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   themeColor: "#09090b",
   icons: {
-    icon: "/favicon.png",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.png", type: "image/png" }
+    ],
     apple: "/icon-192.png",
   },
   verification: {
