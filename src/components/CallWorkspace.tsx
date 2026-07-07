@@ -1826,87 +1826,71 @@ export default function CallWorkspace({ roomId }: CallWorkspaceProps) {
                 {showMoreDesktopOptions && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowMoreDesktopOptions(false)} />
-                    <div className="absolute bottom-12 right-0 z-50 flex items-center gap-1.5 bg-[#09090b]/95 border border-white/10 backdrop-blur-md p-1.5 rounded-full shadow-2xl animate-in slide-in-from-bottom-2 duration-150">
+                    <div className="absolute bottom-14 right-0 z-50 w-56 py-2 bg-zinc-950/95 border border-white/10 backdrop-blur-md rounded-2xl shadow-2xl animate-in slide-in-from-bottom-2 duration-150 flex flex-col font-mono text-xs">
                       
-                      {/* Reactions Picker Trigger */}
+                      {/* Send Reaction */}
                       <button
                         onClick={() => { setShowEmojiPicker(!showEmojiPicker); setShowMoreDesktopOptions(false); }}
-                        className={`flex items-center justify-center w-10 h-10 rounded-full transition-all active:scale-95 ${
-                          showEmojiPicker
-                            ? "bg-white text-black border-transparent"
-                            : "border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                        }`}
-                        title="Send Reaction"
+                        className="w-full px-4 py-2.5 flex items-center gap-3 text-zinc-300 hover:text-white hover:bg-white/5 transition-colors text-left"
                       >
-                        <Smile className="h-5 w-5" />
+                        <Smile className="h-4 w-4 text-zinc-400" />
+                        <span>Send Reaction</span>
                       </button>
 
-                      {/* Local Video Filter Trigger */}
+                      {/* Video Filters */}
                       <button
-                        onClick={handleToggleFilter}
-                        className={`flex items-center justify-center w-10 h-10 rounded-full transition-all active:scale-95 ${
-                          localFilter !== "none"
-                            ? "bg-purple-600 text-white border-transparent"
-                            : "border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                        }`}
-                        title={`Video Filter: ${localFilter}`}
+                        onClick={() => { handleToggleFilter(); setShowMoreDesktopOptions(false); }}
+                        className="w-full px-4 py-2.5 flex items-center gap-3 text-zinc-300 hover:text-white hover:bg-white/5 transition-colors text-left"
                       >
-                        <Sparkles className="h-5 w-5" />
+                        <Sparkles className={`h-4 w-4 ${localFilter !== "none" ? "text-purple-400" : "text-zinc-400"}`} />
+                        <span>Video Filters</span>
                       </button>
 
-                      {/* Call Recording Trigger */}
+                      {/* Call Recording */}
                       <button
-                        onClick={handleToggleRecording}
-                        className={`flex items-center justify-center w-10 h-10 rounded-full transition-all active:scale-95 ${
-                          isRecording
-                            ? "bg-red-600 text-white border-transparent animate-pulse"
-                            : "border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                        }`}
-                        title={isRecording ? "Stop Recording" : "Record Session"}
+                        onClick={() => { handleToggleRecording(); setShowMoreDesktopOptions(false); }}
+                        className="w-full px-4 py-2.5 flex items-center gap-3 text-zinc-300 hover:text-white hover:bg-white/5 transition-colors text-left"
                       >
-                        <Disc className="h-5 w-5" />
+                        <Disc className={`h-4 w-4 ${isRecording ? "text-red-500 animate-pulse" : "text-zinc-400"}`} />
+                        <span>{isRecording ? "Stop Recording" : "Record Session"}</span>
                       </button>
 
-                      {/* Live Captions Toggle */}
+                      {/* Live Captions */}
                       {captionsSupported && (
                         <button
-                          onClick={toggleCaptions}
-                          className={`flex items-center justify-center w-10 h-10 rounded-full transition-all active:scale-95 ${
-                            captionsActive
-                              ? "bg-green-600 text-white border-transparent"
-                              : "border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                          }`}
-                          title={captionsActive ? "Turn Off Captions" : "Turn On Captions"}
+                          onClick={() => { toggleCaptions(); setShowMoreDesktopOptions(false); }}
+                          className="w-full px-4 py-2.5 flex items-center gap-3 text-zinc-300 hover:text-white hover:bg-white/5 transition-colors text-left"
                         >
-                          {captionsActive ? <Captions className="h-5 w-5" /> : <CaptionsOff className="h-5 w-5" />}
+                          {captionsActive ? (
+                            <Captions className="h-4 w-4 text-green-400" />
+                          ) : (
+                            <CaptionsOff className="h-4 w-4 text-zinc-400" />
+                          )}
+                          <span>{captionsActive ? "Turn Off Captions" : "Turn On Captions"}</span>
                         </button>
                       )}
+
+                      {/* Divider */}
+                      <div className="h-px bg-white/5 my-1" />
 
                       {/* Whiteboard */}
                       <button
                         onClick={() => { setShowWhiteboard(!showWhiteboard); setShowMoreDesktopOptions(false); }}
-                        className={`flex items-center justify-center w-10 h-10 rounded-full transition-all active:scale-95 ${
-                          showWhiteboard
-                            ? "bg-white text-black border-transparent"
-                            : "border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                        }`}
-                        title="Whiteboard"
+                        className="w-full px-4 py-2.5 flex items-center gap-3 text-zinc-300 hover:text-white hover:bg-white/5 transition-colors text-left"
                       >
-                        <PenTool className="h-5 w-5" />
+                        <PenTool className={`h-4 w-4 ${showWhiteboard ? "text-white" : "text-zinc-400"}`} />
+                        <span>Whiteboard</span>
                       </button>
 
                       {/* Google Shared Doc */}
                       <button
                         onClick={() => { triggerHaptic(); playTapSound(); setShowGoogleDoc(!showGoogleDoc); setShowChat(false); setShowParticipants(false); setShowMoreDesktopOptions(false); }}
-                        className={`flex items-center justify-center w-10 h-10 rounded-full transition-all active:scale-95 ${
-                          showGoogleDoc
-                            ? "bg-blue-600 text-white border-transparent"
-                            : "border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                        }`}
-                        title="Shared Google Doc"
+                        className="w-full px-4 py-2.5 flex items-center gap-3 text-zinc-300 hover:text-white hover:bg-white/5 transition-colors text-left"
                       >
-                        <FileText className="h-5 w-5" />
+                        <FileText className={`h-4 w-4 ${showGoogleDoc ? "text-blue-400" : "text-zinc-400"}`} />
+                        <span>Shared Google Doc</span>
                       </button>
+
                     </div>
                   </>
                 )}
