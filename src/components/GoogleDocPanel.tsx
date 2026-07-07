@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { ref, set, onValue, off } from "firebase/database";
@@ -70,17 +70,24 @@ export default function GoogleDocPanel({ roomId, visible, localIsHost, onClose }
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!visible) return null;
-
   return (
-    <div className="fixed inset-y-0 right-0 z-40 flex flex-col w-full md:w-[520px] bg-zinc-950 border-l border-white/10 shadow-2xl animate-in slide-in-from-right duration-300">
+    <div
+      style={{
+        transform: visible ? "translateX(0)" : "translateX(100%)",
+      }}
+      className={`fixed inset-y-0 right-0 md:relative z-40 h-full flex flex-col border-l border-white/10 bg-zinc-950/95 shadow-2xl md:shadow-none overflow-hidden transition-all duration-300 ease-in-out ${
+        visible
+          ? "w-full md:w-[600px] opacity-100"
+          : "w-0 md:w-0 opacity-0 pointer-events-none md:border-l-0"
+      }`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 flex-shrink-0">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-zinc-400" />
-          <span className="text-xs font-bold uppercase tracking-wider font-mono text-white">Shared Document</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider font-mono text-white">Shared Document</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {docUrl && (
             <>
               <button
@@ -112,28 +119,28 @@ export default function GoogleDocPanel({ roomId, visible, localIsHost, onClose }
 
       {/* Host URL input bar */}
       {localIsHost && (
-        <div className="px-4 py-3 border-b border-white/10 flex-shrink-0 space-y-2">
+        <div className="px-4 py-3.5 border-b border-white/10 flex-shrink-0 space-y-2.5">
           <p className="text-[9px] font-mono uppercase tracking-wider text-zinc-500">
             Paste a Google Doc, Sheet, or Slides link to share with everyone
           </p>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <input
               type="url"
               value={inputVal}
               onChange={(e) => { setInputVal(e.target.value); setInputError(false); }}
               placeholder="https://docs.google.com/document/d/..."
-              className={`flex-1 h-8 px-3 rounded-lg bg-white/5 border text-[11px] font-mono text-white placeholder:text-zinc-600 outline-none transition-all focus:border-white/30 ${inputError ? "border-red-500/50" : "border-white/10"}`}
+              className={`flex-1 h-9 px-3 rounded-lg bg-white/5 border text-xs font-mono text-white placeholder:text-zinc-600 outline-none transition-all focus:border-white/30 ${inputError ? "border-red-500/50" : "border-white/10"}`}
             />
             <button
               onClick={handleSetDoc}
-              className="h-8 px-3 rounded-lg bg-white text-black text-[10px] font-bold font-mono uppercase tracking-wider hover:opacity-80 transition-opacity flex-shrink-0"
+              className="h-9 px-4 rounded-lg bg-white text-black text-[10px] font-bold font-mono uppercase tracking-wider hover:bg-zinc-200 transition-colors flex-shrink-0 flex items-center justify-center"
             >
               Share
             </button>
             {docUrl && (
               <button
                 onClick={handleClearDoc}
-                className="h-8 px-3 rounded-lg border border-white/10 text-zinc-400 text-[10px] font-mono uppercase tracking-wider hover:border-white/30 hover:text-white transition-all flex-shrink-0"
+                className="h-9 px-3 rounded-lg border border-white/10 text-zinc-400 text-[10px] font-mono uppercase tracking-wider hover:border-white/30 hover:text-white transition-all flex-shrink-0 flex items-center justify-center"
               >
                 Clear
               </button>
@@ -150,28 +157,30 @@ export default function GoogleDocPanel({ roomId, visible, localIsHost, onClose }
 
       {/* Document embed or placeholder */}
       <div className="flex-1 overflow-hidden relative">
-        {embedUrl ? (
-          <iframe
-            src={embedUrl}
-            className="w-full h-full border-0"
-            allow="clipboard-read; clipboard-write"
-            title="Shared Google Document"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-              <FileText className="h-6 w-6 text-zinc-500" />
+        {visible && (
+          embedUrl ? (
+            <iframe
+              src={embedUrl}
+              className="w-full h-full border-0"
+              allow="clipboard-read; clipboard-write"
+              title="Shared Google Document"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
+              <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                <FileText className="h-6 w-6 text-zinc-500" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white font-mono">No Document Shared</p>
+                <p className="text-[10px] text-zinc-500 font-mono mt-1">
+                  {localIsHost
+                    ? "Paste a Google Doc link above to collaborate with participants."
+                    : "Waiting for the host to share a document..."}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-bold text-white font-mono">No Document Shared</p>
-              <p className="text-[10px] text-zinc-500 font-mono mt-1">
-                {localIsHost
-                  ? "Paste a Google Doc link above to collaborate with participants."
-                  : "Waiting for the host to share a document..."}
-              </p>
-            </div>
-          </div>
+          )
         )}
       </div>
     </div>
